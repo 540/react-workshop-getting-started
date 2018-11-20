@@ -5,13 +5,14 @@ export default class GameList extends Component {
     super(props);
 
     this.state = {
-      games: []
+      games: [],
+      isLoading: false
     };
   }
 
   getGames = async () => {
     const gamesData = await fetch(
-      "http://www.mocky.io/v2/5bf3f9dd3100006500619ac3"
+      "http://www.mocky.io/v2/5bf3f9dd3100006500619ac3?mocky-delay=2000ms"
     );
     const games = await gamesData.json();
 
@@ -19,9 +20,11 @@ export default class GameList extends Component {
   };
 
   async componentDidMount() {
+    this.setState({ isLoading: true });
+
     const games = await this.getGames();
 
-    this.setState({ games: games });
+    this.setState({ games: games, isLoading: false });
   }
 
   createGameRow = (game, index) => (
@@ -44,9 +47,12 @@ export default class GameList extends Component {
               <th scope="col">Nombre</th>
             </tr>
           </thead>
-          <tbody>{this.state.games.map(this.createGameRow, this)}</tbody>
+          <tbody>{this.state.isLoading ? <Loading /> : this.state.games.map(this.createGameRow, this)}</tbody>
         </table>
       </div>
     );
   }
 }
+
+const Loading = () =>
+  <div>Loading ...</div>

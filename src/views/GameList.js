@@ -1,13 +1,20 @@
 import React, { Component } from "react";
 
+const isSearched = searchTerm => game => (
+  game.name.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 export default class GameList extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       games: [],
-      isLoading: false
+      isLoading: false,
+      searchTerm: ""
     };
+
+    this.onSearchChange = this.onSearchChange.bind(this);
   }
 
   getGames = async () => {
@@ -27,6 +34,10 @@ export default class GameList extends Component {
     this.setState({ games: games, isLoading: false });
   }
 
+  onSearchChange(event) {
+    this.setState({ searchTerm: event.target.value });
+  }
+
   createGameRow = (game, index) => (
     <tr key={game.id}>
       <th scope="row">{index + 1}</th>
@@ -39,6 +50,17 @@ export default class GameList extends Component {
     return (
       <div>
         <h1>Juegos clásicos</h1>
+        <div>
+          <form>
+            <div className="form-row">
+              <div className="form-group col-md-3" >
+                <label htmlFor="searchTermInput">Filtro</label>
+                <input type="text" className="form-control" id="searchTermInput" aria-describedby="emailHelp"
+                       placeholder="Filtrar por..." onChange={this.onSearchChange} />
+              </div>
+            </div>
+          </form>
+        </div>
         <table className="table">
           <thead>
             <tr>
@@ -47,12 +69,19 @@ export default class GameList extends Component {
               <th scope="col">Nombre</th>
             </tr>
           </thead>
-          <tbody>{this.state.isLoading ? <Loading /> : this.state.games.map(this.createGameRow, this)}</tbody>
+          <tbody>
+            {this.state.isLoading ? (
+              <Loading />
+            ) : (
+              this.state.games
+                .filter(isSearched(this.state.searchTerm))
+                .map(this.createGameRow, this)
+            )}
+          </tbody>
         </table>
       </div>
     );
   }
 }
 
-const Loading = () =>
-  <div>Loading ...</div>
+const Loading = () => <div>Loading ...</div>;
